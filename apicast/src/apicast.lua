@@ -1,6 +1,7 @@
 local provider = require('provider')
 local balancer = require('balancer')
 local configuration_loader = require('configuration_loader')
+local hawkular = require('resty.hawkular')
 local util = require('util')
 local pcall = pcall
 local tonumber = tonumber
@@ -105,7 +106,7 @@ end
 
 function _M.access()
   local fun = provider.call()
-  return fun()
+  return hawkular.run('access', fun)
 end
 
 function _M.body_filter()
@@ -126,6 +127,8 @@ end
 
 _M.balancer = balancer.call
 
-_M.log = function() end
+_M.log = function()
+  hawkular.new():gauge('upstream', ngx.var.upstream_response_time * 1000)
+end
 
 return _M
